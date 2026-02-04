@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Extensions.Caching.Distributed;
 using Npgsql.Replication.PgOutput.Messages;
+using SSRUnited.Shared.Common;
 using SSRUnited.Shared.Data;
 using SSRUnited.Shared.Dtos;
 using SSRUnited.Shared.Entity;
@@ -52,7 +53,7 @@ namespace SSRUnited.Shared.Respository
             await _cache.RemoveAsync("humans_list", cancellationToken);
         }
 
-        public async Task<List<HumanDto>> Listing(CancellationToken cancellationToken = default!)
+        public async Task<Result<List<HumanDto>>> Listing(CancellationToken cancellationToken = default!)
         {
             string cacheKey = "humans_list";
 
@@ -60,7 +61,7 @@ namespace SSRUnited.Shared.Respository
 
             if(cached_data is not null)
             {
-                return JsonSerializer.Deserialize<List<HumanDto>>(cached_data)!;
+                return JsonSerializer.Deserialize<Result<List<HumanDto>>>(cached_data)!;
             }
 
             var data = await _context.humans
@@ -75,10 +76,10 @@ namespace SSRUnited.Shared.Respository
 
             var SerializeData = JsonSerializer.Serialize(data);
             await _cache.SetStringAsync(cacheKey, SerializeData, _cacheOptions, cancellationToken);
-            return data;
+            return Result<List<HumanDto>>.Success(data);
         }
 
-        public async Task<HumanDto?> Get(int Id, CancellationToken cancellationToken = default!)
+        public async Task<Result<HumanDto>> Get(int Id, CancellationToken cancellationToken = default!)
         {
             string cacheKey = $"human_{Id}";
 
@@ -86,11 +87,11 @@ namespace SSRUnited.Shared.Respository
 
             if(CachedData is not null)
             {
-                return JsonSerializer.Deserialize<HumanDto>(CachedData)!;
+                return JsonSerializer.Deserialize<Result<HumanDto>>(CachedData)!;
             }
 
             var query = await _context.humans.FirstOrDefaultAsync(s => s.Id == Id, cancellationToken);
-            if (query is null) return null;
+            if (query is null) return Result<HumanDto>.NoContent();
 
 
             var data = new HumanDto
@@ -102,25 +103,25 @@ namespace SSRUnited.Shared.Respository
 
             var SerializeData = JsonSerializer.Serialize(data);
             await _cache.SetStringAsync(cacheKey,SerializeData, _cacheOptions, cancellationToken);
-            return data;
+            return Result<HumanDto>.Success(data);
         }
-        public async Task<bool> Delete(int Id, CancellationToken cancellationToken = default!)
+        public async Task<Result<bool>> Delete(int Id, CancellationToken cancellationToken = default!)
         {
             var query = await _context.humans.FirstOrDefaultAsync(s => s.Id == Id, cancellationToken);
-            if (query is null) return false;
+            if (query is null) return Result<bool>.NoContent();
 
             _context.humans.Remove(query);
             await _context.SaveChangesAsync(cancellationToken);
 
             await _cache.RemoveAsync($"human_{Id}", cancellationToken);
             await _cache.RemoveAsync("humans_list", cancellationToken);
-            return true;
+            return Result<bool>.Success(true);
 
         }
-        public async Task<bool> Update(HumanDto request, CancellationToken cancellationToken = default!)
+        public async Task<Result<bool>> Update(HumanDto request, CancellationToken cancellationToken = default!)
         {
             var query = await _context.humans.FirstOrDefaultAsync(s => s.Id == request.Id);
-            if (query is null) return false;
+            if (query is null) return Result<bool>.NoContent();
 
             query.content = request.content;
             query.name = request.name;
@@ -129,7 +130,7 @@ namespace SSRUnited.Shared.Respository
 
             await _cache.RemoveAsync($"human_{request.Id}", cancellationToken);
             await _cache.RemoveAsync("humans_list", cancellationToken);
-            return true;
+             return Result<bool>.Success(true);
 
         }
     }

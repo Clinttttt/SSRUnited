@@ -393,7 +393,9 @@
 
         try
         {
-            humans = await repository.Listing();
+            var request  = await repository.Listing();
+            if(request.value is not null)
+            humans = request.value;
             sw.Stop();
             loadTime = sw.ElapsedMilliseconds;
 
@@ -450,7 +452,7 @@
         try
         {
             var success = await repository.Update(editHuman);
-            if (success)
+            if (success.is_success)
             {
                 ShowMessage("Human updated successfully! Cache cleared.", false);
                 editingId = null;
@@ -478,7 +480,7 @@
         try
         {
             var success = await repository.Delete(id);
-            if (success)
+            if (success.is_success)
             {
                 ShowMessage("Human deleted successfully! Cache cleared.", false);
                 await LoadData();

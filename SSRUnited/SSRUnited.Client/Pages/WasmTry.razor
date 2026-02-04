@@ -30,7 +30,7 @@ else
 @code {
     private string name = "";
     private string content = "";
-    private List<HumanDto> humans = new();
+    private List<HumanDto> humans = new List<HumanDto>();
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -41,7 +41,10 @@ else
     private async Task LoadData()
     {
         isLoading = true;
-        humans = await ApiClient.Listing() ?? new();
+        var request = await ApiClient.Listing();
+        if(request?.value is not null)
+         humans = request.value;
+
         isLoading = false;
     }
 
