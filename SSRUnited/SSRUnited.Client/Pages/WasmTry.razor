@@ -1,8 +1,60 @@
 ﻿@page "/trywasm"
+@using SSRUnited.Client.Interface
+@using SSRUnited.Shared.Dtos
+@inject ICrudApiClient ApiClient
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
+<h3>WASM CRUD Test</h3>
 
-<h3>WasmTry</h3>
+<input @bind="name" placeholder="Name" />
+<input @bind="content" placeholder="Content" />
+<button @onclick="Create">Create</button>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var human in humans)
+        {
+            <li>
+                @human.name - @human.content
+                <button @onclick="() => Delete(human.Id)">Delete</button>
+            </li>
+        }
+    </ul>
+}
 
 @code {
+    private string name = "";
+    private string content = "";
+    private List<HumanDto> humans = new();
+    private bool isLoading = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        humans = await ApiClient.Listing() ?? new();
+        isLoading = false;
+    }
+
+    private async Task Create()
+    {
+        await ApiClient.CreateAsync(new HumanDto { name = name, content = content });
+        await LoadData();
+        name = content = "";
+    }
+
+    private async Task Delete(int id)
+    {
+        await ApiClient.Delete(id);
+        await LoadData();
+    }
 }

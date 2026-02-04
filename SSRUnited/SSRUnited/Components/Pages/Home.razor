@@ -2,7 +2,8 @@
 @using SSRUnited.Shared.Dtos
 @using SSRUnited.Shared.Interface
 @inject IIRespository repository
-@rendermode InteractiveServer
+
+@rendermode @(new InteractiveServerRenderMode( prerender: false))
 
 <PageTitle>Redis Caching Test</PageTitle>
 
@@ -69,9 +70,9 @@
                         @foreach (var human in humans)
                         {
                             <tr>
-                                <td>@human.id</td>
+                                <td>@human.Id</td>
                                 <td>
-                                    @if (editingId == human.id)
+                                    @if (editingId == human.Id)
                                     {
                                         <input @bind="editHuman.name" class="input-small" />
                                     }
@@ -81,7 +82,7 @@
                                     }
                                 </td>
                                 <td>
-                                    @if (editingId == human.id)
+                                    @if (editingId == human.Id)
                                     {
                                         <input @bind="editHuman.content" class="input-small" />
                                     }
@@ -92,15 +93,15 @@
                                 </td>
                                 <td>@human.created_at.ToString("yyyy-MM-dd HH:mm")</td>
                                 <td>
-                                    @if (editingId == human.id)
+                                    @if (editingId == human.Id)
                                     {
-                                        <button @onclick="() => SaveEdit(human.id)" class="btn-small btn-success">Save</button>
+                                        <button @onclick="() => SaveEdit(human.Id)" class="btn-small btn-success">Save</button>
                                         <button @onclick="CancelEdit" class="btn-small btn-secondary">Cancel</button>
                                     }
                                     else
                                     {
                                         <button @onclick="() => StartEdit(human)" class="btn-small btn-warning">Edit</button>
-                                        <button @onclick="() => DeleteHuman(human.id)" class="btn-small btn-danger">Delete</button>
+                                        <button @onclick="() => DeleteHuman(human.Id)" class="btn-small btn-danger">Delete</button>
                                     }
                                 </td>
                             </tr>
@@ -435,10 +436,10 @@
 
     private void StartEdit(HumanDto human)
     {
-        editingId = human.id;
+        editingId = human.Id;
         editHuman = new HumanDto
         {
-            id = human.id,
+            Id = human.Id,
             name = human.name,
             content = human.content
         };

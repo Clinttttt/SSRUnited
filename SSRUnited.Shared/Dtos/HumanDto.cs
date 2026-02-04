@@ -9,9 +9,8 @@ namespace SSRUnited.Shared.Dtos
 {
     public class HumanDto
     {
-        [JsonIgnore]
-        public int id { get; set; }
-        [JsonIgnore]
+      
+        public int Id { get; set; }   
         public DateTime created_at { get; set; }
         public string? name { get; set; }
         public string? content { get; set; }

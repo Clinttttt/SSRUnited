@@ -54,7 +54,7 @@ namespace SSRUnited.Shared.Respository
 
         public async Task<List<HumanDto>> Listing(CancellationToken cancellationToken = default!)
         {
-            string cacheKey = "human_list";
+            string cacheKey = "humans_list";
 
             var cached_data = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
@@ -68,7 +68,7 @@ namespace SSRUnited.Shared.Respository
                 {
                     name = s.name,
                     content = s.content,
-                    id = s.Id,
+                    Id = s.Id,
                     created_at = s.created_at,
 
                 }).ToListAsync(cancellationToken);
@@ -119,7 +119,7 @@ namespace SSRUnited.Shared.Respository
         }
         public async Task<bool> Update(HumanDto request, CancellationToken cancellationToken = default!)
         {
-            var query = await _context.humans.FirstOrDefaultAsync(s => s.Id == request.id);
+            var query = await _context.humans.FirstOrDefaultAsync(s => s.Id == request.Id);
             if (query is null) return false;
 
             query.content = request.content;
@@ -127,7 +127,7 @@ namespace SSRUnited.Shared.Respository
             _context.humans.Update(query);
             await _context.SaveChangesAsync(cancellationToken);
 
-            await _cache.RemoveAsync($"human_{request.id}", cancellationToken);
+            await _cache.RemoveAsync($"human_{request.Id}", cancellationToken);
             await _cache.RemoveAsync("humans_list", cancellationToken);
             return true;
 
